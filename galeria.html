@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prints Painel CCO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            background-color: #018e80; /* Cor solicitada */
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            width: 100%;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            text-align: center;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            cursor: grab;
+        }
+        /* Mensagem explicativa do zoom */
+        .zoom-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+    <script src="Contents/jquery-3.4.1.min.js"></script>
+    <script src="Scripts/wheelzoom.js"></script>
+</head>
+<body>
+    <div class="header">Prints Painel CCO</div>
+    <div class="container">
+        <div id="gallery"></div>
+    </div>
+    <!-- Mensagem explicativa do zoom -->
+    <div class="zoom-message">Movimente o scroll do mouse sob a imagem para dar zoom.</div>
+
+    <script src="jquery-mim.js"></script> <!-- Adicione o script de controle de acesso -->
+    <script>
+        window.onload = function() {
+            const directory = '/imagenscu';
+            const galleryElement = document.getElementById('gallery');
+            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+            function getImages() {
+                fetch(directory)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const links = Array.from(doc.querySelectorAll('a[href]'))
+                            .filter(link => {
+                                const href = link.getAttribute('href');
+                                const ext = href.split('.').pop().toLowerCase();
+                                return imageExtensions.includes(ext);
+                            });
+                        const latestImage = getLatestImage(links);
+                        displayImage(latestImage);
+                    })
+                    .catch(error => console.error('Erro ao obter imagens:', error));
+            }
+
+            function getLatestImage(links) {
+                if (links.length === 0) {
+                    return null;
+                }
+
+                let latestImage = links[0];
+                let latestTime = extractDateTimeFromName(latestImage.getAttribute('href'));
+
+                links.forEach(link => {
+                    const dateTime = extractDateTimeFromName(link.getAttribute('href'));
+                    if (dateTime > latestTime) {
+                        latestTime = dateTime;
+                        latestImage = link;
+                    }
+                });
+
+                return latestImage;
+            }
+
+            function extractDateTimeFromName(name) {
+                const regex = /RGVP_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/;
+                const match = name.match(regex);
+                if (match) {
+                    const [_, year, month, day, hour, minute, second] = match.map(Number);
+                    return new Date(year, month - 1, day, hour, minute, second).getTime();
+                }
+                return 0;
+            }
+
+            function displayImage(link) {
+                galleryElement.innerHTML = ''; // Limpa o conteúdo existente
+                if (link) {
+                    const img = document.createElement('img');
+                    img.src = directory + '/' + link.getAttribute('href').split('/').pop();
+                    img.alt = 'Última imagem adicionada';
+                    img.id = 'latestImage';
+                    galleryElement.appendChild(img);
+
+                    // Aplicar zoom com wheelzoom.js
+                    wheelzoom(img);
+
+                    // Adicionar evento de clique para abrir a imagem em overlay
+                    img.addEventListener('click', () => {
+                        // Implemente aqui a lógica para abrir a imagem em overlay com zoom
+                    });
+                } else {
+                    galleryElement.textContent = 'Nenhuma imagem encontrada.';
+                }
+            }
+
+            // Chama a função getImages uma vez para carregar a imagem inicial
+            getImages();
+
+            // Configura a atualização da imagem a cada 60 segundos
+            setInterval(getImages, 60000); // 60000 milissegundos = 60 segundos
+        };
+    </script>
+</body>
+</html>
