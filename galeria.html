@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prints Painel CCO</title>
+    <title>Painel CCO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,13 +15,28 @@
             align-items: center;
         }
         .header {
-            background-color: #018e80; /* Cor solicitada */
+            background-color: #4abeb5; 
             color: white;
             padding: 15px;
             text-align: center;
             font-size: 24px;
             font-weight: bold;
             width: 100%;
+            position: relative; /* Adicionado para posicionamento do ícone */
+        }
+        .header .title {
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .header img {
+            width: 95px; /* Aumente o tamanho do ícone conforme desejado */
+            height: auto;
+            position: absolute;
+            left: 40px; /* Ajuste a distância do canto esquerdo conforme necessário */
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2; /* Garantir que o ícone fique sobre o texto */
         }
         .container {
             background-color: #ffffff;
@@ -40,6 +55,33 @@
             margin: 0 auto;
             cursor: grab;
         }
+        .recent-images {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .recent-images .image-container {
+            width: 100px; /* Largura dos quadrados das imagens */
+            height: 100px; /* Altura dos quadrados das imagens */
+            margin: 5px;
+            text-align: center;
+        }
+        .recent-images .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .caption {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .updates-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
         /* Mensagem explicativa do zoom */
         .zoom-message {
             position: fixed;
@@ -55,9 +97,14 @@
     <script src="Scripts/wheelzoom.js"></script>
 </head>
 <body>
-    <div class="header">Prints Painel CCO</div>
+    <div class="header"> 
+        <img src="vale-logo-1.svg" alt="Ícone">
+        <span class="title">Painel CCO</span>
+    </div>
     <div class="container">
         <div id="gallery"></div>
+        <div class="updates-title">Últimas atualizações</div>
+        <div class="recent-images" id="recent-images"></div>
     </div>
     <!-- Mensagem explicativa do zoom -->
     <div class="zoom-message">Movimente o scroll do mouse sob a imagem para dar zoom.</div>
@@ -67,6 +114,7 @@
         window.onload = function() {
             const directory = '/imagenscu';
             const galleryElement = document.getElementById('gallery');
+            const recentImagesElement = document.getElementById('recent-images');
             const imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
 
             function getImages() {
@@ -81,29 +129,14 @@
                                 const ext = href.split('.').pop().toLowerCase();
                                 return imageExtensions.includes(ext);
                             });
-                        const latestImage = getLatestImage(links);
+                        const sortedLinks = links.sort((a, b) => {
+                            return extractDateTimeFromName(b.getAttribute('href')) - extractDateTimeFromName(a.getAttribute('href'));
+                        });
+                        const latestImage = sortedLinks[0];
                         displayImage(latestImage);
+                        displayRecentImages(sortedLinks.slice(1, 6));
                     })
                     .catch(error => console.error('Erro ao obter imagens:', error));
-            }
-
-            function getLatestImage(links) {
-                if (links.length === 0) {
-                    return null;
-                }
-
-                let latestImage = links[0];
-                let latestTime = extractDateTimeFromName(latestImage.getAttribute('href'));
-
-                links.forEach(link => {
-                    const dateTime = extractDateTimeFromName(link.getAttribute('href'));
-                    if (dateTime > latestTime) {
-                        latestTime = dateTime;
-                        latestImage = link;
-                    }
-                });
-
-                return latestImage;
             }
 
             function extractDateTimeFromName(name) {
@@ -116,6 +149,16 @@
                 return 0;
             }
 
+            function formatDateTime(name) {
+                const regex = /RGVP_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/;
+                const match = name.match(regex);
+                if (match) {
+                    const [_, year, month, day, hour, minute, second] = match.map(Number);
+                    return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year} - ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
+                }
+                return '';
+            }
+
             function displayImage(link) {
                 galleryElement.innerHTML = ''; // Limpa o conteúdo existente
                 if (link) {
@@ -125,7 +168,6 @@
                     img.id = 'latestImage';
                     galleryElement.appendChild(img);
 
-                    // Aplicar zoom com wheelzoom.js
                     wheelzoom(img);
 
                     // Adicionar evento de clique para abrir a imagem em overlay
@@ -135,6 +177,26 @@
                 } else {
                     galleryElement.textContent = 'Nenhuma imagem encontrada.';
                 }
+            }
+
+            function displayRecentImages(links) {
+                recentImagesElement.innerHTML = ''; // Limpa o conteúdo existente
+                links.forEach(link => {
+                    const container = document.createElement('div');
+                    container.className = 'image-container';
+
+                    const img = document.createElement('img');
+                    img.src = directory + '/' + link.getAttribute('href').split('/').pop();
+                    img.alt = 'Imagem recente';
+
+                    const caption = document.createElement('div');
+                    caption.className = 'caption';
+                    caption.textContent = formatDateTime(link.getAttribute('href'));
+
+                    container.appendChild(img);
+                    container.appendChild(caption);
+                    recentImagesElement.appendChild(container);
+                });
             }
 
             // Chama a função getImages uma vez para carregar a imagem inicial
