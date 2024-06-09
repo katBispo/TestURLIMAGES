@@ -13,26 +13,51 @@
             align-items: center;
             height: 100vh;
             background-color: #f0f0f0;
+            flex-direction: column; /* Adicionado para empilhar elementos verticalmente */
         }
         img {
             max-width: 90%;
             max-height: 90%;
             border-radius: 10px;
+           /* margin-top: 10px; /* Adicionado espaço entre a imagem e o título */
+        }
+        #image-title {
+            font-size: 16px;
+            margin-top: -5px;
         }
     </style>
     <script src="Scripts/wheelzoom.js"></script>
 </head>
 <body>
-    <img id="image" src="" alt="Imagem">
+    <div id="image-container"> <!-- Adicionado um contêiner para centralizar imagem e título -->
+        <img id="image" src="" alt="Imagem">
+        <div id="image-title"></div>
+    </div>
     <script>
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const imgSrc = urlParams.get('src');
+            const imgSrc = decodeURIComponent(urlParams.get('src')); // Decodifica a URL
             const imgElement = document.getElementById('image');
+            const titleElement = document.getElementById('image-title');
 
             if (imgSrc) {
                 imgElement.src = imgSrc;
                 wheelzoom(imgElement);
+
+                // Extrair informações do nome da imagem para o título
+                const filename = imgSrc.split('/').pop(); // Obtém o nome do arquivo da URL
+                const parts = filename.split('_'); // Divide o nome do arquivo em partes
+                if (parts.length === 3) { // Verifica se há três partes (prefixo RGVP, data e hora)
+                    const dataPart = parts[1]; // Parte com a data
+                    const horaPart = parts[2].replace('-', ':'); // Parte com a hora (substitui '-' por ':')
+                    const ano = dataPart.substring(0, 4); // Obtém o ano
+                    const mes = dataPart.substring(4, 6); // Obtém o mês
+                    const dia = dataPart.substring(6, 8); // Obtém o dia
+                    const titulo = `${dia}/${mes}/${ano} - ${horaPart}`; // Formata o título
+                    titleElement.textContent = titulo; // Define o título completo
+                } else {
+                    titleElement.textContent = 'Título da Imagem'; // Define um título padrão se as informações não estiverem no formato esperado
+                }
             }
         };
     </script>

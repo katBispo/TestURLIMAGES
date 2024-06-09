@@ -40,7 +40,7 @@
         }
         .container {
             background-color: #ffffff;
-            padding: 20px;
+            padding: 50px;
             margin: 20px auto;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -82,7 +82,7 @@
         .updates-title {
             font-size: 18px;
             font-weight: bold;
-            margin-top: 20px;
+            margin-top: 90px;
         }
         .overlay {
             display: none;
@@ -111,14 +111,17 @@
         /* Mensagem explicativa do zoom */
         .zoom-message {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            top: 58%;
+            left: 4.5%; /* Ajuste o valor conforme necessário */
+            transform: translateY(-100%);
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
             padding: 10px;
             border-radius: 5px;
-            z-index: 5; /* Ensures the message is above other elements */
-        }
+            z-index: 5;
+            margin-top: 10px;
+}
+
     </style>
     <script src="Contents/jquery-3.4.1.min.js"></script>
     <script src="Scripts/wheelzoom.js"></script>
@@ -130,10 +133,10 @@
     </div>
     <div class="container">
         <div id="gallery"></div>
+        <!-- Mensagem explicativa do zoom -->
+        <div class="zoom-message">Movimente o scroll do mouse sob a imagem para manipular o zoom.</div>
         <div class="updates-title">Últimas atualizações</div>
         <div class="recent-images" id="recent-images"></div>
-        <!-- Mensagem explicativa do zoom -->
-        <div class="zoom-message">Movimente o scroll do mouse sob a imagem para dar zoom.</div>
     </div>
     <!-- Overlay para exibir a imagem em tamanho grande -->
     <div class="overlay" id="overlay">
@@ -252,4 +255,4 @@
         };
     </script>
 </body>
-</html>
+</html
