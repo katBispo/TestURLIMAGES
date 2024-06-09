@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel CCO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            background-color: #4abeb5; 
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            width: 100%;
+            position: relative; 
+        }
+        .header .title {
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .header img {
+            width: 95px; 
+            height: auto;
+            position: absolute;
+            left: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2; 
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 50px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            text-align: center;
+            position: relative;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            cursor: grab;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .overlay img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .overlay .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+        }
+        .zoom-message {
+            position: absolute;
+            top: 95%;
+            left: 4.5%; 
+            transform: translateY(-100%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 5;
+            margin-top: 10px;
+        }
+    </style>
+    <script src="Contents/jquery-3.4.1.min.js"></script>
+    <script src="Scripts/wheelzoom.js"></script>
+</head>
+<body>
+    <div class="header"> 
+        <img src="vale-logo-1.svg" alt="Ícone">
+        <span class="title">Painel CCO</span>
+    </div>
+    <div class="container">
+        <div id="gallery"></div>
+        <div class="zoom-message">Movimente o scroll do mouse sob a imagem para manipular o zoom.</div>
+    </div>
+    <div class="overlay" id="overlay">
+        <span class="close-btn" id="close-btn">&times;</span>
+        <img id="overlay-image" src="" alt="Imagem Grande">
+    </div>
+    <script>
+        window.onload = function() {
+            const directory = '/imagenscu';
+            const galleryElement = document.getElementById('gallery');
+            const overlayElement = document.getElementById('overlay');
+            const overlayImageElement = document.getElementById('overlay-image');
+            const closeBtn = document.getElementById('close-btn');
+            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+            function getImages() {
+                fetch(directory)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const links = Array.from(doc.querySelectorAll('a[href]'))
+                            .filter(link => {
+                                const href = link.getAttribute('href');
+                                const ext = href.split('.').pop().toLowerCase();
+                                return imageExtensions.includes(ext);
+                            });
+                        const sortedLinks = links.sort((a, b) => {
+                            return extractDateTimeFromName(b.getAttribute('href')) - extractDateTimeFromName(a.getAttribute('href'));
+                        });
+                        const latestImage = sortedLinks[0];
+                        displayImage(latestImage);
+                    })
+                    .catch(error => console.error('Erro ao obter imagens:', error));
+            }
+
+            function extractDateTimeFromName(name) {
+                const regex = /RGVP_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/;
+                const match = name.match(regex);
+                if (match) {
+                    const [_, year, month, day, hour, minute, second] = match.map(Number);
+                    return new Date(year, month - 1, day, hour, minute, second).getTime();
+                }
+                return 0;
+            }
+
+            function displayImage(link) {
+                galleryElement.innerHTML = ''; 
+                if (link) {
+                    const img = document.createElement('img');
+                    img.src = directory + '/' + link.getAttribute('href').split('/').pop();
+                    img.alt = 'Última imagem adicionada';
+                    img.id = 'latestImage';
+                    galleryElement.appendChild(img);
+
+                    wheelzoom(img);
+
+                    img.addEventListener('click', function() {
+                        openOverlay(img.src);
+                    });
+                } else {
+                    galleryElement.textContent = 'Nenhuma imagem encontrada.';
+                }
+            }
+
+            function openOverlay(src) {
+                overlayImageElement.src = src;
+                overlayElement.style.display = 'flex';
+                wheelzoom(overlayImageElement);
+            }
+
+            function closeOverlay() {
+                overlayElement.style.display = 'none';
+                overlayImageElement.src = '';
+            }
+
+            closeBtn.addEventListener('click', closeOverlay);
+
+            getImages();
+
+            setInterval(getImages, 60000); 
+        };
+    </script>
+</body>
+</html>
