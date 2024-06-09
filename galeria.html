@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,6 +46,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 100%;
             text-align: center;
+            position: relative;
         }
         img {
             max-width: 100%;
@@ -109,13 +110,14 @@
         }
         /* Mensagem explicativa do zoom */
         .zoom-message {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
             padding: 10px;
             border-radius: 5px;
+            z-index: 5; /* Ensures the message is above other elements */
         }
     </style>
     <script src="Contents/jquery-3.4.1.min.js"></script>
@@ -130,15 +132,14 @@
         <div id="gallery"></div>
         <div class="updates-title">Últimas atualizações</div>
         <div class="recent-images" id="recent-images"></div>
+        <!-- Mensagem explicativa do zoom -->
+        <div class="zoom-message">Movimente o scroll do mouse sob a imagem para dar zoom.</div>
     </div>
     <!-- Overlay para exibir a imagem em tamanho grande -->
     <div class="overlay" id="overlay">
         <span class="close-btn" id="close-btn">&times;</span>
         <img id="overlay-image" src="" alt="Imagem Grande">
     </div>
-    <!-- Mensagem explicativa do zoom -->
-    <div class="zoom-message">Movimente o scroll do mouse sob a imagem para dar zoom.</div>
-
     <script>
         window.onload = function() {
             const directory = '/imagenscu';
@@ -220,13 +221,14 @@
                     caption.className = 'caption';
                     caption.textContent = formatDateTime(link.getAttribute('href'));
 
-                    container.appendChild(img);
-                    container.appendChild(caption);
-                    recentImagesElement.appendChild(container);
+                    const linkElement = document.createElement('a');
+                    linkElement.href = `image.html?src=${encodeURIComponent(directory + '/' + link.getAttribute('href').split('/').pop())}`;
+                    linkElement.target = '_blank';
+                    linkElement.appendChild(img);
+                    linkElement.appendChild(caption);
 
-                    img.addEventListener('click', () => {
-                        openOverlay(img.src);
-                    });
+                    container.appendChild(linkElement);
+                    recentImagesElement.appendChild(container);
                 });
             }
 
