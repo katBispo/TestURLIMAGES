@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listar Conteúdos</title>
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="galeria"></div>
+    <script>
+        window.onload = function() {
+            const directory = '/imagenscu';
+            const galleryElement = document.getElementById('galeria');
+
+            function listDirectoryContents() {
+                fetch(directory)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const files = Array.from(doc.querySelectorAll('a'))
+                                           .map(link => link.getAttribute('href'))
+                                           .filter(href => /\.(jpg|jpeg|png|gif)$/i.test(href));
+                        displayFiles(files);
+                    })
+                    .catch(error => console.error('Erro ao listar conteúdos da pasta:', error));
+            }
+
+            function displayFiles(files) {
+                const ul = document.createElement('ul');
+                galleryElement.appendChild(ul);
+
+                files.forEach(file => {
+                    const li = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = `image.html?src=${encodeURIComponent(`${directory}/${file.split('/').pop()}`)}`;
+                    link.target = '_blank';
+                    link.textContent = file.split('/').pop(); // Extrai o nome do arquivo
+
+                    li.appendChild(link);
+                    ul.appendChild(li);
+                });
+            }
+
+            listDirectoryContents();
+        };
+    </script>
+</body>
+</html>

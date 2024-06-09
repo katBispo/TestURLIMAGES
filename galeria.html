@@ -22,7 +22,7 @@
             font-size: 24px;
             font-weight: bold;
             width: 100%;
-            position: relative; /* Adicionado para posicionamento do ícone */
+            position: relative; 
         }
         .header .title {
             margin: 0;
@@ -30,13 +30,13 @@
             z-index: 1;
         }
         .header img {
-            width: 95px; /* Aumente o tamanho do ícone conforme desejado */
+            width: 95px; 
             height: auto;
             position: absolute;
-            left: 40px; /* Ajuste a distância do canto esquerdo conforme necessário */
+            left: 40px;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 2; /* Garantir que o ícone fique sobre o texto */
+            z-index: 2; 
         }
         .container {
             background-color: #ffffff;
@@ -62,8 +62,8 @@
             margin-top: 20px;
         }
         .recent-images .image-container {
-            width: 100px; /* Largura dos quadrados das imagens */
-            height: 100px; /* Altura dos quadrados das imagens */
+            width: 100px;
+            height: 100px; 
             margin: 5px;
             text-align: center;
             cursor: pointer;
@@ -139,7 +139,6 @@
     <!-- Mensagem explicativa do zoom -->
     <div class="zoom-message">Movimente o scroll do mouse sob a imagem para dar zoom.</div>
 
-    <script src="jquery-mim.js"></script> <!-- Adicione o script de controle de acesso -->
     <script>
         window.onload = function() {
             const directory = '/imagenscu';
@@ -193,7 +192,7 @@
             }
 
             function displayImage(link) {
-                galleryElement.innerHTML = ''; // Limpa o conteúdo existente
+                galleryElement.innerHTML = ''; 
                 if (link) {
                     const img = document.createElement('img');
                     img.src = directory + '/' + link.getAttribute('href').split('/').pop();
@@ -208,7 +207,7 @@
             }
 
             function displayRecentImages(links) {
-                recentImagesElement.innerHTML = ''; // Limpa o conteúdo existente
+                recentImagesElement.innerHTML = ''; 
                 links.forEach(link => {
                     const container = document.createElement('div');
                     container.className = 'image-container';
@@ -240,16 +239,14 @@
             function closeOverlay() {
                 overlayElement.style.display = 'none';
                 overlayImageElement.src = '';
-                wheelzoom.destroy(overlayImageElement); // Remove a funcionalidade de zoom ao fechar
+                wheelzoom.destroy(overlayImageElement); 
             }
 
             closeBtn.addEventListener('click', closeOverlay);
 
-            // Chama a função getImages uma vez para carregar a imagem inicial
             getImages();
 
-            // Configura a atualização da imagem a cada 60 segundos
-            setInterval(getImages, 60000); // 60000 milissegundos = 60 segundos
+            setInterval(getImages, 60000); 
         };
     </script>
 </body>
